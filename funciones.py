@@ -45,7 +45,7 @@ def es_texto_valido(texto):
     return tiene_letras
 
 
-# Solicita un texto no vacío por consola; devuelve None si el usuario ingresa "0" para cancelar
+# Solicita un texto no vacío por consola; devuelve None si se ingresa "0" para cancelar
 def pedir_texto(mensaje, solo_letras=False):
     while True:
         entrada = input(mensaje).strip()
@@ -167,7 +167,7 @@ def agregar_pais(lista_paises):
     console.print("\n[bold cyan]--- AGREGAR NUEVO PAÍS ---[/bold cyan]")
     console.print("[yellow]Escriba [bold cyan]0[/bold cyan] en cualquier campo para cancelar y volver al menú.[/yellow]")
     
-    # 1. Validación del nombre y verificación de duplicados
+    # 1. Valida el nombre y la verificación de duplicados
     while True:
         nombre = pedir_texto("Ingrese el nombre del país: ", solo_letras=True)
         if nombre is None:

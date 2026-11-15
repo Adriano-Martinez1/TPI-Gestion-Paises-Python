@@ -2,7 +2,7 @@ import os
 import questionary
 from rich.console import Console
 from rich.panel import Panel
-# Importamos las funciones 
+# Importa las funciones 
 from funciones import (
     cargar_datos, agregar_pais, actualizar_pais, 
     buscar_pais, filtrar_paises, ordenar_paises, 
@@ -21,7 +21,7 @@ def menu_principal():
     # 1. Carga los datos en memoria apenas arranca el programa
     paises = cargar_datos()
     
-    # 2. Bucle infinito para mantener el menú activo
+    # 2. Bucle para mantener el menú activo
     while True:
         limpiar_pantalla()
         # Muestra el título principal y el estado del sistema dentro de un panel con Rich
@@ -32,7 +32,7 @@ def menu_principal():
             padding=(1, 4)
         ))
         
-        # Menú interactivo navegable con flechas del teclado usando Questionary
+        # Menú interactivo con flechas del teclado usando Questionary
         opcion = questionary.select(
             "Use las flechas para navegar y Enter para seleccionar:",
             choices=[
@@ -52,7 +52,7 @@ def menu_principal():
             style=ESTILO_MENU
         ).ask()
         
-        # Evalua la opción elegida según el prefijo numérico
+        # Evalua la opción elegida
         if opcion is None or opcion.startswith("8."):
             console.print("\n[bold yellow]Saliendo del sistema...[/bold yellow]")
             break
@@ -74,6 +74,5 @@ def menu_principal():
         # Pausa para que el usuario pueda leer el resultado antes de limpiar y volver al menú
         input("\nPresione Enter para continuar...")
 
-# Punto de entrada del programa
 if __name__ == "__main__":
     menu_principal()
