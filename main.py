@@ -6,7 +6,7 @@ from rich.panel import Panel
 from funciones import (
     cargar_datos, agregar_pais, actualizar_pais, 
     buscar_pais, filtrar_paises, ordenar_paises, 
-    mostrar_estadisticas, mostrar_tabla_paises
+    mostrar_estadisticas, mostrar_tabla_paises, ESTILO_MENU
 )
 
 # Inicializa la consola de Rich para los títulos y mensajes
@@ -24,22 +24,32 @@ def menu_principal():
     # 2. Bucle infinito para mantener el menú activo
     while True:
         limpiar_pantalla()
-        # Muestra el título principal dentro de un panel con Rich
-        console.print(Panel.fit("[bold cyan]SISTEMA DE GESTIÓN DE PAÍSES[/bold cyan]", border_style="blue"))
+        # Muestra el título principal y el estado del sistema dentro de un panel con Rich
+        console.print(Panel.fit(
+            f"[bold cyan]🌍 SISTEMA DE GESTIÓN DE PAÍSES[/bold cyan]\n"
+            f"[dim]Base de datos activa: [bold white]{len(paises)}[/bold white] países registrados[/dim]",
+            border_style="bright_blue",
+            padding=(1, 4)
+        ))
         
         # Menú interactivo navegable con flechas del teclado usando Questionary
         opcion = questionary.select(
             "Use las flechas para navegar y Enter para seleccionar:",
             choices=[
-                "1. Agregar un país",
-                "2. Ver países cargados",
-                "3. Actualizar datos de un país",
-                "4. Buscar un país",
-                "5. Filtrar países",
-                "6. Ordenar países",
-                "7. Ver estadísticas",
-                "8. Salir"
-            ]
+                questionary.Separator("── Gestión de Datos ──"),
+                "1. ➕ Agregar un país",
+                "2. 📋 Ver países cargados",
+                "3. ✏️  Actualizar datos de un país",
+                questionary.Separator("── Consultas y Análisis ──"),
+                "4. 🔍 Buscar un país",
+                "5. 🌪️  Filtrar países",
+                "6. 📊 Ordenar países",
+                "7. 📈 Ver estadísticas",
+                questionary.Separator("── Sistema ──"),
+                "8. 🚪 Salir"
+            ],
+            instruction=" ",
+            style=ESTILO_MENU
         ).ask()
         
         # Evalua la opción elegida según el prefijo numérico
