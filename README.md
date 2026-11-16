@@ -166,7 +166,7 @@ Ingrese la población: 3426000
 ## Documentación y Video Demostrativo
 
 - **Informe Técnico (PDF):** Disponible directamente en la raíz de este repositorio (`Informe_TPI_Paises.pdf`).
-- **Video Demostrativo (10-15 min):** [Pegar aquí el enlace público al video]
+- **Video Demostrativo (10-15 min):** 
 
 ---
 
