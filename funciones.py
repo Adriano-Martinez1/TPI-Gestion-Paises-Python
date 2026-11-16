@@ -4,6 +4,7 @@ import questionary
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from rich.markup import escape
 
 # Inicializa la consola de Rich para imprimir con colores, tablas y paneles
 console = Console()
@@ -43,6 +44,15 @@ def es_texto_valido(texto):
         elif caracter not in (" ", "-", "."):
             return False
     return tiene_letras
+
+
+# Devuelve el continente válido que coincide (ignorando tildes y mayúsculas) o None
+def normalizar_continente(texto):
+    buscado = quitar_tildes(texto.lower())
+    for valido in CONTINENTES_VALIDOS:
+        if quitar_tildes(valido.lower()) == buscado:
+            return valido
+    return None
 
 
 # Solicita un texto no vacío por consola; devuelve None si se ingresa "0" para cancelar
@@ -114,17 +124,19 @@ def mostrar_tabla_paises(lista, titulo="LISTADO DE PAÍSES"):
 # Lee los registros desde el archivo CSV y los devuelve como una lista de diccionarios
 def cargar_datos(ruta_archivo=RUTA_CSV):
     lista_paises = []
-    
+    hubo_advertencias = False
+
     try:
-        with open(ruta_archivo, "r", encoding="utf-8") as archivo:
+        # utf-8-sig tolera el BOM que agrega Excel al guardar
+        with open(ruta_archivo, "r", encoding="utf-8-sig") as archivo:
             lector = csv.DictReader(archivo)
-            
+
             for numero_fila, fila in enumerate(lector, start=2):
                 try:
                     nombre = fila["nombre"].strip()
-                    continente = fila["continente"].strip()
-                    if not es_texto_valido(nombre) or not es_texto_valido(continente):
-                        raise ValueError("Campos de texto inválidos o vacíos")
+                    continente = normalizar_continente(fila["continente"].strip())
+                    if not es_texto_valido(nombre) or continente is None:
+                        raise ValueError("Nombre o continente inválido")
 
                     poblacion = int(fila["poblacion"])
                     superficie = int(fila["superficie"])
@@ -137,18 +149,25 @@ def cargar_datos(ruta_archivo=RUTA_CSV):
                         "superficie": superficie,
                         "continente": continente
                     })
-                except (ValueError, KeyError, TypeError):
+                except (ValueError, KeyError, TypeError, AttributeError):
+                    hubo_advertencias = True
                     console.print(f"[bold yellow]Advertencia:[/bold yellow] Fila {numero_fila} del CSV con formato inválido. Se omitirá.")
-                
+
     except FileNotFoundError:
+        hubo_advertencias = True
         console.print(f"[bold yellow]Aviso:[/bold yellow] El archivo '{ruta_archivo}' no se encontró. Se iniciará con una lista vacía.")
     except Exception as e:
+        hubo_advertencias = True
         console.print(f"[bold red]Ocurrió un error inesperado al leer el archivo:[/bold red] {e}")
-        
+
+    # Pausa solo si hubo avisos, para que no los borre limpiar_pantalla()
+    if hubo_advertencias:
+        input("\nPresione Enter para continuar...")
+
     return lista_paises
 
 
-# Guarda la lista completa de países en el archivo CSV
+# Guarda la lista completa de países en el archivo CSV y devuelve True si tuvo éxito
 def guardar_datos(lista_paises, ruta_archivo=RUTA_CSV):
     try:
         encabezados = ["nombre", "poblacion", "superficie", "continente"]
@@ -156,17 +175,19 @@ def guardar_datos(lista_paises, ruta_archivo=RUTA_CSV):
             escritor = csv.DictWriter(archivo, fieldnames=encabezados)
             escritor.writeheader()
             escritor.writerows(lista_paises)
+        return True
     except PermissionError:
         console.print("[bold red]Error:[/bold red] El archivo está abierto en otro programa. Ciérrelo para poder guardar.")
     except Exception as e:
         console.print(f"[bold red]Ocurrió un error inesperado al guardar:[/bold red] {e}")
+    return False
 
 
 # Solicita los datos de un nuevo país, valida las entradas y lo persiste en el CSV
 def agregar_pais(lista_paises):
     console.print("\n[bold cyan]--- AGREGAR NUEVO PAÍS ---[/bold cyan]")
     console.print("[yellow]Escriba [bold cyan]0[/bold cyan] en cualquier campo para cancelar y volver al menú.[/yellow]")
-    
+
     # 1. Valida el nombre y la verificación de duplicados
     while True:
         nombre = pedir_texto("Ingrese el nombre del país: ", solo_letras=True)
@@ -199,14 +220,16 @@ def agregar_pais(lista_paises):
     if superficie is None:
         return
 
-    # 4. Guardado en memoria y disco
+    # 4. Guardado en memoria y disco (revierte si falla la escritura)
     lista_paises.append({
         "nombre": nombre,
         "poblacion": poblacion,
         "superficie": superficie,
         "continente": continente
     })
-    guardar_datos(lista_paises)
+    if not guardar_datos(lista_paises):
+        lista_paises.pop()
+        return
     console.print(f"[bold green]¡Éxito![/bold green] El país '[cyan]{nombre}[/cyan]' se agregó correctamente.")
 
 
@@ -235,9 +258,15 @@ def actualizar_pais(lista_paises):
     if nueva_superficie is None:
         return
 
+    poblacion_anterior = pais_obj["poblacion"]
+    superficie_anterior = pais_obj["superficie"]
     pais_obj["poblacion"] = nueva_poblacion
     pais_obj["superficie"] = nueva_superficie
-    guardar_datos(lista_paises)
+
+    if not guardar_datos(lista_paises):
+        pais_obj["poblacion"] = poblacion_anterior
+        pais_obj["superficie"] = superficie_anterior
+        return
     console.print("[bold green]¡Éxito![/bold green] Los datos fueron actualizados correctamente.")
 
 
@@ -252,9 +281,9 @@ def buscar_pais(lista_paises):
 
     termino = quitar_tildes(entrada.lower())
     encontrados = [p for p in lista_paises if termino in quitar_tildes(p["nombre"].lower())]
-            
+
     if len(encontrados) > 0:
-        mostrar_tabla_paises(encontrados, f"COINCIDENCIAS PARA '{termino.upper()}'")
+        mostrar_tabla_paises(encontrados, f"COINCIDENCIAS PARA '{escape(entrada.upper())}'")
     else:
         console.print("[bold yellow]No se encontraron países que coincidan con su búsqueda.[/bold yellow]")
 
@@ -262,7 +291,7 @@ def buscar_pais(lista_paises):
 # Filtra la lista de países por continente, rango de población o rango de superficie
 def filtrar_paises(lista_paises):
     console.print("\n[bold cyan]--- FILTRAR PAÍSES ---[/bold cyan]")
-    
+
     opcion_filtro = questionary.select(
         "Elija un criterio de filtro:",
         choices=[
@@ -281,7 +310,7 @@ def filtrar_paises(lista_paises):
         return
 
     encontrados = []
-    
+
     if opcion_filtro.startswith("1."):
         continente_elegido = questionary.select(
             "Seleccione el continente a filtrar:",
@@ -293,10 +322,10 @@ def filtrar_paises(lista_paises):
         if continente_elegido is None or continente_elegido == "Cancelar y volver al menú":
             console.print("[bold yellow]Operación cancelada. Volviendo al menú principal...[/bold yellow]")
             return
-        
+
         continente_buscado = quitar_tildes(continente_elegido.lower())
         encontrados = [p for p in lista_paises if quitar_tildes(p["continente"].lower()) == continente_buscado]
-                
+
     else:
         # Unifica el filtrado por rango numérico para población y superficie
         es_poblacion = opcion_filtro.startswith("2.")
@@ -323,7 +352,7 @@ def filtrar_paises(lista_paises):
 # Ordena los países por nombre, población o superficie en sentido ascendente o descendente
 def ordenar_paises(lista_paises):
     console.print("\n[bold cyan]--- ORDENAR PAÍSES ---[/bold cyan]")
-    
+
     criterio = questionary.select(
         "Elija el criterio de ordenamiento:",
         choices=[
@@ -353,16 +382,16 @@ def ordenar_paises(lista_paises):
 
     if orden is None:
         return
-        
+
     reverso = orden.startswith("2.")
-    
+
     if criterio.startswith("1."):
         lista_ordenada = sorted(lista_paises, key=lambda x: quitar_tildes(x["nombre"].lower()), reverse=reverso)
     elif criterio.startswith("2."):
         lista_ordenada = sorted(lista_paises, key=lambda x: x["poblacion"], reverse=reverso)
     else:
         lista_ordenada = sorted(lista_paises, key=lambda x: x["superficie"], reverse=reverso)
-        
+
     mostrar_tabla_paises(lista_ordenada, "PAÍSES ORDENADOS")
 
 
@@ -371,27 +400,27 @@ def mostrar_estadisticas(lista_paises):
     if len(lista_paises) == 0:
         console.print("[bold yellow]No hay países cargados para calcular estadísticas.[/bold yellow]")
         return
-        
+
     total_poblacion = 0
     total_superficie = 0
     conteo_continentes = {}
-    
+
     for pais in lista_paises:
         total_poblacion += pais["poblacion"]
         total_superficie += pais["superficie"]
         cont = pais["continente"]
         conteo_continentes[cont] = conteo_continentes.get(cont, 0) + 1
-        
+
     promedio_poblacion = total_poblacion / len(lista_paises)
     promedio_superficie = total_superficie / len(lista_paises)
-    
+
     pais_max_pob = max(lista_paises, key=lambda x: x["poblacion"])
     pais_min_pob = min(lista_paises, key=lambda x: x["poblacion"])
     pais_max_sup = max(lista_paises, key=lambda x: x["superficie"])
     pais_min_sup = min(lista_paises, key=lambda x: x["superficie"])
 
     detalle_continentes = "".join(f"  • {cont}: {cant}\n" for cont, cant in conteo_continentes.items())
-    
+
     resumen = (
         f"[bold]Cantidad total de países en el sistema:[/bold] {len(lista_paises)}\n"
         f"[bold]Población total combinada:[/bold] {total_poblacion:,} hab.\n"

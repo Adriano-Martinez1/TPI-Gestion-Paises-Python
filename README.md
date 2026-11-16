@@ -54,7 +54,7 @@ TPI-Gestion-Paises-Python/
 
 1. **Descargar o clonar** el repositorio en su equipo:
    ```bash
-   git clone [https://github.com/Adriano-Martinez1/TPI-Gestion-Paises-Python.git](https://github.com/Adriano-Martinez1/TPI-Gestion-Paises-Python.git)
+   git clone https://github.com/Adriano-Martinez1/TPI-Gestion-Paises-Python.git
    ```
 2. **Abrir una terminal** ubicada dentro de la carpeta del proyecto:
    ```bash
@@ -114,13 +114,13 @@ Ingrese la superficie en km2: 756102
 ```
 **Salida del sistema:**
 ```text
-                  PAÍSES FILTRADOS (2)
-┏━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
-┃ País      ┃ Continente ┃  Población ┃ Superficie (km²) ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
-│ Argentina │ América    │ 46,234,830 │        2,780,400 │
-│ Chile     │ América    │ 19,600,000 │          756,102 │
-└───────────┴────────────┴────────────┴──────────────────┘
+                   PAÍSES FILTRADOS (2)                    
+┏━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃ País      ┃ Continente ┃   Población ┃ Superficie (km²) ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ Argentina │ América    │  45,376,763 │        2,780,400 │
+│ Brasil    │ América    │ 213,993,437 │        8,515,767 │
+└───────────┴────────────┴─────────────┴──────────────────┘
 ```
 
 ---
@@ -143,22 +143,22 @@ Ingrese la población: 3426000
 ### 4. Visualización de estadísticas (Opción 7)
 **Salida del sistema:**
 ```text
-╭────────────── ESTADÍSTICAS DEL SISTEMA ──────────────╮
-│ Cantidad total de países en el sistema: 4            │
-│ Población total combinada: 204,434,830 hab.          │
-│ Población promedio: 51,108,707.50 hab.               │
-│ Superficie promedio: 973,618.75 km²                  │
-│                                                      │
-│ ▲ Mayor población: Japón (125,100,000 hab.)          │
-│ ▼ Menor población: Alemania (83,200,000 hab.)        │
-│ ▲ Mayor superficie: Argentina (2,780,400 km²)        │
-│ ▼ Menor superficie: Alemania (357,588 km²)           │
-│                                                      │
-│ Cantidad de países por continente:                   │
-│   • América: 2                                       │
-│   • Asia: 1                                          │
-│   • Europa: 1                                        │
-╰──────────────────────────────────────────────────────╯
+╭─────────── ESTADÍSTICAS DEL SISTEMA ───────────╮
+│ Cantidad total de países en el sistema: 4      │
+│ Población total combinada: 468,319,500 hab.    │
+│ Población promedio: 117,079,875.00 hab.        │
+│ Superficie promedio: 3,007,791.00 km²          │
+│                                                │
+│ ▲ Mayor población: Brasil (213,993,437 hab.)   │
+│ ▼ Menor población: Argentina (45,376,763 hab.) │
+│ ▲ Mayor superficie: Brasil (8,515,767 km²)     │
+│ ▼ Menor superficie: Alemania (357,022 km²)     │
+│                                                │
+│ Cantidad de países por continente:             │
+│   • América: 2                                 │
+│   • Asia: 1                                    │
+│   • Europa: 1                                  │
+╰────────────────────────────────────────────────╯
 ```
 
 ---
@@ -170,6 +170,8 @@ Ingrese la población: 3426000
 
 ---
 
-## Participación de los Integrantes
+## Participación de los Integrantes:
+
+## Trabajo realizado de manera individual.
 
 - **Adriano Salvador Martínez Barbuzza:** Diseño de la arquitectura modular, implementación de la persistencia en CSV, desarrollo de las funcionalidades, filtros, ordenamientos y estadísticas en Python, diseño de interfaz en consola (`rich` y `questionary`), redacción de documentación técnica y pruebas del sistema.
