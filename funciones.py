@@ -78,6 +78,9 @@ def pedir_entero(mensaje, minimo=1):
         if entrada == "0":
             console.print("[bold yellow]Operación cancelada. Volviendo al menú principal...[/bold yellow]")
             return None
+        if entrada == "":
+            console.print("[bold red]Error:[/bold red] El campo no puede estar vacío.")
+            continue
         try:
             valor = int(entrada)
             if valor < minimo:
@@ -239,7 +242,7 @@ def actualizar_pais(lista_paises):
     console.print("[yellow]Escriba [bold cyan]0[/bold cyan] en cualquier campo para cancelar y volver al menú.[/yellow]")
 
     while True:
-        entrada = pedir_texto("Ingrese el nombre del país que desea actualizar: ")
+        entrada = pedir_texto("Ingrese el nombre del país que desea actualizar: ", solo_letras=True)
         if entrada is None:
             return
         pais_obj = obtener_pais_exacto(lista_paises, entrada)
